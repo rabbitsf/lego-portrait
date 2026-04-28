@@ -83,6 +83,18 @@ zoomSlider.addEventListener('input', () => {
   if (currentImage) processAndRender();
 });
 
+document.getElementById('zoom-minus').addEventListener('click', () => {
+  zoomSlider.value = Math.max(parseInt(zoomSlider.min), parseInt(zoomSlider.value) - 10);
+  zoomValue = parseInt(zoomSlider.value);
+  if (currentImage) processAndRender();
+});
+
+document.getElementById('zoom-plus').addEventListener('click', () => {
+  zoomSlider.value = Math.min(parseInt(zoomSlider.max), parseInt(zoomSlider.value) + 10);
+  zoomValue = parseInt(zoomSlider.value);
+  if (currentImage) processAndRender();
+});
+
 contrastSlider.addEventListener('input', () => {
   contrastValue = parseInt(contrastSlider.value);
   if (currentImage) processAndRender();

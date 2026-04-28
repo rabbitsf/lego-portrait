@@ -161,10 +161,23 @@
       accent-color: #FFD700;
     }
 
-    .control-row .range-icon {
+    .range-btn {
+      background: none;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      width: 26px;
+      height: 26px;
       font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
       color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
+    .range-btn:hover { border-color: #aaa; color: #111; }
+    .range-btn:active { background: #eee; }
 
     /* Right panel — piece counts */
     .right-panel {
@@ -324,9 +337,9 @@
       </div>
       <div class="control-row">
         <label>Zoom</label>
-        <span class="range-icon">−</span>
+        <button class="range-btn" id="zoom-minus">−</button>
         <input type="range" id="zoom-slider" min="100" max="400" value="100">
-        <span class="range-icon">+</span>
+        <button class="range-btn" id="zoom-plus">+</button>
       </div>
       <div class="control-row">
         <label>Contrast</label>
