@@ -254,6 +254,27 @@
     }
     .btn-primary:hover { background: #e6c200; }
 
+    .size-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .size-btn {
+      padding: 5px 10px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .size-btn:hover { border-color: #aaa; }
+    .size-btn.active {
+      background: #FFD700;
+      border-color: #FFD700;
+      color: #111;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -293,6 +314,14 @@
     </div>
 
     <div class="controls" id="controls">
+      <div class="control-row">
+        <label>Size</label>
+        <div class="size-btns">
+          <button class="size-btn" data-size="16">16×16</button>
+          <button class="size-btn" data-size="25">25×25</button>
+          <button class="size-btn active" data-size="50">50×50</button>
+        </div>
+      </div>
       <div class="control-row">
         <label>Zoom</label>
         <span class="range-icon">−</span>

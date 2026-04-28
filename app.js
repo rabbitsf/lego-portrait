@@ -46,8 +46,9 @@ const PALETTES = [
   },
 ];
 
-const GRID_SIZE = 50;
-const STUD_PX   = 10; // canvas pixels per stud (500px canvas / 50 studs)
+const CANVAS_PX = 500;
+let GRID_SIZE   = 50;
+let STUD_PX     = CANVAS_PX / GRID_SIZE;
 
 let currentImage   = null;
 let currentPalette = PALETTES[0];
@@ -94,6 +95,16 @@ resetBtn.addEventListener('click', () => {
   contrastValue= 100;
   applyZoom();
   if (currentImage) processAndRender();
+});
+
+document.querySelectorAll('.size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    GRID_SIZE = parseInt(btn.dataset.size);
+    STUD_PX   = CANVAS_PX / GRID_SIZE;
+    if (currentImage) processAndRender();
+  });
 });
 
 restartBtn.addEventListener('click', () => {
@@ -203,8 +214,11 @@ function nearestColor(r, g, b, colors) {
 function renderMosaic(grid) {
   const ctx = mosaicCanvas.getContext('2d');
   const colors = currentPalette.colors;
+  const size = GRID_SIZE * STUD_PX;
+  mosaicCanvas.width  = size;
+  mosaicCanvas.height = size;
 
-  ctx.clearRect(0, 0, 500, 500);
+  ctx.clearRect(0, 0, size, size);
 
   for (let row = 0; row < GRID_SIZE; row++) {
     for (let col = 0; col < GRID_SIZE; col++) {
@@ -229,8 +243,8 @@ function renderMosaic(grid) {
   ctx.strokeStyle = 'rgba(0,0,0,0.08)';
   ctx.lineWidth   = 0.5;
   for (let i = 0; i <= GRID_SIZE; i++) {
-    ctx.beginPath(); ctx.moveTo(i * STUD_PX, 0); ctx.lineTo(i * STUD_PX, 500); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, i * STUD_PX); ctx.lineTo(500, i * STUD_PX); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i * STUD_PX, 0); ctx.lineTo(i * STUD_PX, size); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i * STUD_PX); ctx.lineTo(size, i * STUD_PX); ctx.stroke();
   }
 }
 
