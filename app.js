@@ -181,14 +181,32 @@ function quantizeImage(img, contrast) {
   wc.width  = GRID_SIZE;
   wc.height = GRID_SIZE;
 
-  // Crop to square from center, applying zoom as a tighter crop into the source image
-  const baseSize = Math.min(img.width, img.height);
-  const size = baseSize * (100 / zoomValue);
-  const ox   = (img.width  - size) / 2;
-  const oy   = (img.height - size) / 2;
+  const aspect = img.width / img.height;
 
-  ctx.filter = `contrast(${contrast}%)`;
-  ctx.drawImage(img, ox, oy, size, size, 0, 0, GRID_SIZE, GRID_SIZE);
+  if (zoomValue <= 100) {
+    // Fit entire image into square, letterbox non-square edges with neutral fill
+    let dstW, dstH, dstX = 0, dstY = 0;
+    if (aspect >= 1) {
+      dstW = GRID_SIZE; dstH = GRID_SIZE / aspect;
+      dstY = (GRID_SIZE - dstH) / 2;
+    } else {
+      dstH = GRID_SIZE; dstW = GRID_SIZE * aspect;
+      dstX = (GRID_SIZE - dstW) / 2;
+    }
+    ctx.filter = 'none';
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
+    ctx.filter = `contrast(${contrast}%)`;
+    ctx.drawImage(img, 0, 0, img.width, img.height, dstX, dstY, dstW, dstH);
+  } else {
+    // Zoom in: square center crop, tighter as zoom increases
+    const baseSize = Math.min(img.width, img.height);
+    const cropSize = baseSize / (zoomValue / 100);
+    const ox = (img.width  - cropSize) / 2;
+    const oy = (img.height - cropSize) / 2;
+    ctx.filter = `contrast(${contrast}%)`;
+    ctx.drawImage(img, ox, oy, cropSize, cropSize, 0, 0, GRID_SIZE, GRID_SIZE);
+  }
 
   const { data } = ctx.getImageData(0, 0, GRID_SIZE, GRID_SIZE);
   const grid = new Array(GRID_SIZE * GRID_SIZE);
