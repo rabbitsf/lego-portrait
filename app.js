@@ -80,7 +80,7 @@ fileInput.addEventListener('change', e => {
 
 zoomSlider.addEventListener('input', () => {
   zoomValue = parseInt(zoomSlider.value);
-  applyZoom();
+  if (currentImage) processAndRender();
 });
 
 contrastSlider.addEventListener('input', () => {
@@ -93,7 +93,6 @@ resetBtn.addEventListener('click', () => {
   contrastSlider.value= 100;
   zoomValue    = 100;
   contrastValue= 100;
-  applyZoom();
   if (currentImage) processAndRender();
 });
 
@@ -167,7 +166,6 @@ function processAndRender() {
 
   placeholder.classList.add('hidden');
   mosaicCanvas.classList.remove('hidden');
-  applyZoom();
 }
 
 // Sample image to 50×50, apply contrast, then nearest-color quantize
@@ -177,8 +175,9 @@ function quantizeImage(img, contrast) {
   wc.width  = GRID_SIZE;
   wc.height = GRID_SIZE;
 
-  // Crop to square from center
-  const size = Math.min(img.width, img.height);
+  // Crop to square from center, applying zoom as a tighter crop into the source image
+  const baseSize = Math.min(img.width, img.height);
+  const size = baseSize * (100 / zoomValue);
   const ox   = (img.width  - size) / 2;
   const oy   = (img.height - size) / 2;
 
@@ -285,7 +284,3 @@ function updatePieceCounts(grid) {
   pieceCountsEl.innerHTML = html;
 }
 
-// ── Zoom ──────────────────────────────────────────────────────────────────────
-function applyZoom() {
-  mosaicCanvas.style.transform = `scale(${zoomValue / 100})`;
-}
