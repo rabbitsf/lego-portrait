@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEGO Mosaic Maker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 16px 24px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+
+    header h1 { font-size: 18px; font-weight: 700; }
+    header p { font-size: 12px; color: #666; margin-top: 2px; }
+
+    .app {
+      display: flex;
+      flex: 1;
+      gap: 24px;
+      padding: 24px;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Left panel */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    .upload-btn {
+      width: 100%;
+      padding: 10px;
+      background: #FFD700;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .upload-btn:hover { background: #e6c200; }
+
+    #file-input { display: none; }
+
+    .palette-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .palette-option {
+      border: 3px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .palette-option.active { border-color: #FFD700; }
+    .palette-option img, .palette-option canvas {
+      width: 100%;
+      display: block;
+    }
+    .palette-option .swatch-row {
+      display: flex;
+      height: 12px;
+    }
+    .palette-option .swatch-row span {
+      flex: 1;
+    }
+
+    .reset-btn {
+      background: none;
+      border: 2px solid #333;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+    .reset-btn:hover { background: #eee; }
+
+    /* Center panel */
+    .center-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mosaic-viewport {
+      width: 500px;
+      height: 500px;
+      overflow: hidden;
+      background: #ddd;
+      border: 2px solid #bbb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #mosaic-canvas {
+      image-rendering: pixelated;
+      transform-origin: center center;
+    }
+
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #999;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .placeholder svg { opacity: 0.4; }
+    .placeholder p { font-size: 14px; }
+
+    .controls {
+      width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control-row label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .control-row input[type=range] {
+      flex: 1;
+      accent-color: #FFD700;
+    }
+
+    .control-row .range-icon {
+      font-size: 16px;
+      color: #555;
+    }
+
+    /* Right panel — piece counts */
+    .right-panel {
+      width: 200px;
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .right-panel h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+      color: #333;
+    }
+
+    .piece-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .piece-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+
+    .piece-info { flex: 1; }
+
+    .piece-name {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+
+    .piece-count {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .piece-total {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+      font-size: 12px;
+      color: #555;
+    }
+    .piece-total strong { color: #111; font-size: 16px; }
+
+    /* Bottom bar */
+    .bottom-bar {
+      background: #fff;
+      border-top: 1px solid #ddd;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .btn {
+      padding: 12px 32px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+    .btn-secondary:hover { background: #ccc; }
+
+    .btn-primary {
+      background: #FFD700;
+      color: #111;
+    }
+    .btn-primary:hover { background: #e6c200; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>LEGO® Mosaic Maker</h1>
+  <p>Bring your photos to life with LEGO bricks — 50×50 stud baseplate</p>
+</header>
+
+<div class="app">
+
+  <!-- Left panel -->
+  <div class="left-panel">
+    <button class="upload-btn" id="upload-trigger">Upload Photo</button>
+    <input type="file" id="file-input" accept="image/*">
+
+    <div class="palette-options" id="palette-options">
+      <!-- Populated by JS -->
+    </div>
+
+    <button class="reset-btn" id="reset-btn">↺ RESET</button>
+  </div>
+
+  <!-- Center -->
+  <div class="center-panel">
+    <div class="mosaic-viewport" id="mosaic-viewport">
+      <div class="placeholder" id="placeholder" onclick="document.getElementById('upload-trigger').click()">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <p>Click to upload a photo</p>
+      </div>
+      <canvas id="mosaic-canvas" class="hidden" width="500" height="500"></canvas>
+    </div>
+
+    <div class="controls" id="controls">
+      <div class="control-row">
+        <label>Zoom</label>
+        <span class="range-icon">−</span>
+        <input type="range" id="zoom-slider" min="50" max="200" value="100">
+        <span class="range-icon">+</span>
+      </div>
+      <div class="control-row">
+        <label>Contrast</label>
+        <span class="range-icon">−</span>
+        <input type="range" id="contrast-slider" min="50" max="200" value="100">
+        <span class="range-icon">+</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="right-panel">
+    <h2>Piece Count</h2>
+    <div id="piece-counts">
+      <p style="font-size:12px;color:#aaa;">Upload a photo to see piece counts.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" id="restart-btn">RESTART</button>
+  <button class="btn btn-primary" id="done-btn">DONE</button>
+</div>
+
+<!-- Hidden canvas for image processing -->
+<canvas id="work-canvas" style="display:none"></canvas>
+
+<script src="app.js"></script>
+</body>
+</html>
