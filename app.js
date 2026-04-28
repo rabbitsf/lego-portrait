@@ -182,31 +182,50 @@ function quantizeImage(img, contrast) {
   wc.height = GRID_SIZE;
 
   const aspect = img.width / img.height;
+  const zoomFactor = zoomValue / 100;
 
-  if (zoomValue <= 100) {
-    // Fit entire image into square, letterbox non-square edges with neutral fill
-    let dstW, dstH, dstX = 0, dstY = 0;
-    if (aspect >= 1) {
-      dstW = GRID_SIZE; dstH = GRID_SIZE / aspect;
-      dstY = (GRID_SIZE - dstH) / 2;
+  // The zoom level at which the letterbox disappears and image fills the grid exactly.
+  // Below this: gradually shrink letterbox. Above this: zoom in on the square crop.
+  const fillThreshold = aspect < 1 ? (1 / aspect) : (aspect > 1 ? aspect : 1);
+
+  let srcX, srcY, srcW, srcH, dstX = 0, dstY = 0, dstW = GRID_SIZE, dstH = GRID_SIZE;
+
+  if (zoomFactor < fillThreshold) {
+    // Letterbox mode: show full image, gradually crop the longer axis toward a square
+    if (aspect < 1) {
+      // Portrait — full width, height shrinks toward img.width as zoom rises
+      srcW = img.width;
+      srcH = img.height / zoomFactor;
+      srcX = 0;
+      srcY = (img.height - srcH) / 2;
     } else {
-      dstH = GRID_SIZE; dstW = GRID_SIZE * aspect;
+      // Landscape — full height, width shrinks toward img.height as zoom rises
+      srcH = img.height;
+      srcW = img.width / zoomFactor;
+      srcX = (img.width - srcW) / 2;
+      srcY = 0;
+    }
+    const ra = srcW / srcH;
+    if (ra < 1) {
+      dstW = GRID_SIZE * ra; dstH = GRID_SIZE;
       dstX = (GRID_SIZE - dstW) / 2;
+    } else {
+      dstH = GRID_SIZE / ra; dstW = GRID_SIZE;
+      dstY = (GRID_SIZE - dstH) / 2;
     }
     ctx.filter = 'none';
     ctx.fillStyle = '#f0f0f0';
     ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
-    ctx.filter = `contrast(${contrast}%)`;
-    ctx.drawImage(img, 0, 0, img.width, img.height, dstX, dstY, dstW, dstH);
   } else {
-    // Zoom in: square center crop, tighter as zoom increases
-    const baseSize = Math.min(img.width, img.height);
-    const cropSize = baseSize / (zoomValue / 100);
-    const ox = (img.width  - cropSize) / 2;
-    const oy = (img.height - cropSize) / 2;
-    ctx.filter = `contrast(${contrast}%)`;
-    ctx.drawImage(img, ox, oy, cropSize, cropSize, 0, 0, GRID_SIZE, GRID_SIZE);
+    // Zoom-in mode: square center crop, gets tighter as zoom increases
+    const squareSize = Math.max(img.width, img.height) / zoomFactor;
+    srcW = squareSize; srcH = squareSize;
+    srcX = (img.width  - squareSize) / 2;
+    srcY = (img.height - squareSize) / 2;
   }
+
+  ctx.filter = `contrast(${contrast}%)`;
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH);
 
   const { data } = ctx.getImageData(0, 0, GRID_SIZE, GRID_SIZE);
   const grid = new Array(GRID_SIZE * GRID_SIZE);
