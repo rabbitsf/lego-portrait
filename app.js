@@ -102,9 +102,15 @@ document.querySelectorAll('.size-btn').forEach(btn => {
     btn.classList.add('active');
     GRID_SIZE = parseInt(btn.dataset.size);
     STUD_PX   = CANVAS_PX / GRID_SIZE;
+    updateSubtitle();
     if (currentImage) processAndRender();
   });
 });
+
+function updateSubtitle() {
+  document.getElementById('subtitle').textContent =
+    `Bring your photos to life with bricks — ${GRID_SIZE}×${GRID_SIZE} stud baseplate`;
+}
 
 restartBtn.addEventListener('click', () => {
   currentImage  = null;
