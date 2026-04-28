@@ -100,6 +100,18 @@ contrastSlider.addEventListener('input', () => {
   if (currentImage) processAndRender();
 });
 
+document.getElementById('contrast-minus').addEventListener('click', () => {
+  contrastSlider.value = Math.max(parseInt(contrastSlider.min), parseInt(contrastSlider.value) - 10);
+  contrastValue = parseInt(contrastSlider.value);
+  if (currentImage) processAndRender();
+});
+
+document.getElementById('contrast-plus').addEventListener('click', () => {
+  contrastSlider.value = Math.min(parseInt(contrastSlider.max), parseInt(contrastSlider.value) + 10);
+  contrastValue = parseInt(contrastSlider.value);
+  if (currentImage) processAndRender();
+});
+
 resetBtn.addEventListener('click', () => {
   zoomSlider.value    = 100;
   contrastSlider.value= 100;
