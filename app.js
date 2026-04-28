@@ -72,6 +72,7 @@ const restartBtn    = document.getElementById('restart-btn');
 buildPaletteUI();
 
 uploadTrigger.addEventListener('click', () => fileInput.click());
+document.getElementById('placeholder').addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', e => {
   if (e.target.files[0]) loadImage(e.target.files[0]);
 });

@@ -1,3 +1,6 @@
 # AI workflow artifacts — local only, never commit
 docs/
 CLAUDE.md
+
+# Server config — contains server paths, never commit
+*.conf
